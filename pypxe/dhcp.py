@@ -28,7 +28,7 @@ class DHCPD:
     '''
     def __init__(self, **server_settings):
 
-        self.ip = server_settings.get('ip', '192.168.2.2')
+        self.ip = server_settings.get('ip', '192.168.131.1')
         self.port = int(server_settings.get('port', 67))
         self.offer_from = server_settings.get('offer_from', '192.168.2.100')
         self.offer_to = server_settings.get('offer_to', '192.168.2.150')
@@ -45,7 +45,7 @@ class DHCPD:
             derived_broadcast = socket.inet_ntoa(struct.pack('!I', nbroadcast))
             self.broadcast = derived_broadcast
 
-        self.file_server = server_settings.get('file_server', '192.168.2.2')
+        self.file_server = server_settings.get('file_server', '192.168.131.1')
         self.file_name = server_settings.get('file_name', '')
         if not self.file_name:
             self.force_file_name = False
@@ -236,7 +236,7 @@ class DHCPD:
                 offer = self.get_namespaced_static('dhcp.binding.{0}.ipaddr'.format(self.get_mac(client_mac)))
                 offer = offer if offer else self.next_ip()
                 self.leases[client_mac]['ip'] = offer
-                self.leases[client_mac]['expire'] = time() + 86400
+                self.leases[client_mac]['expire'] = time() + 8888888
                 self.logger.info('New Assignment - MAC: {0} -> IP: {1}'.format(self.get_mac(client_mac), self.leases[client_mac]['ip']))
             response += socket.inet_aton(offer) # yiaddr
         else:
@@ -264,6 +264,7 @@ class DHCPD:
             See RFC2132 9.6 for details.
         '''
         response = self.tlv_encode(53, struct.pack('!B', opt53)) # message type, OFFER
+        print("IP:"+str(self.ip))
         response += self.tlv_encode(54, socket.inet_aton(self.ip)) # DHCP Server
         if not self.mode_proxy:
             subnet_mask = self.get_namespaced_static('dhcp.binding.{0}.subnet'.format(self.get_mac(client_mac)), self.subnet_mask)
@@ -347,7 +348,9 @@ class DHCPD:
             self.logger.info('PXE client request received from {0}'.format(self.get_mac(client_mac)))
             return True
         self.logger.info('Non-PXE client request received from {0}'.format(self.get_mac(client_mac)))
-        return False
+        #return False
+        # Modify to allow non PXEClient DHCP requests
+        return True
 
     def listen(self):
         '''Main listen loop.'''
